@@ -10,17 +10,22 @@ import pytesseract as pyt
 import numpy as np
 from langchain.messages import SystemMessage, HumanMessage
 from langchain.agents import create_agent
-import tempfile
+from PIL import image
 
 # =========================FRONTEND==================
-st.title("AI RESUME GENERATOR")
+st.title("AI RESUME MAKER & JOB APPLY AGENT")
+St.image("https://helloi.ai/wp-content/uploads/elementor/thumbs/ai-resume-builder-qpa8fir5niayzt9g03ab11oc3hj0t0ooz716qqyfs6.jpeg",width=300)
 
 GOOGLE_API_KEY = st.sidebar.text_input("Google Api Key", type = 'password')
 GROQ_API_KEY = st.sidebar.text_input("GROQ Api Key", type = 'password')
 TAVILY_API_KEY = st.sidebar.text_input("TAVILY Api Key", type = 'password')
 
-if not GOOGLE_API_KEY:
-  st.warning("Provide Google API key")
+if not (GOOGLE_API_KEY) and not(GROQ_API_KEY) and not (TAVILY_API_KEY):
+  st.sidebar.warning("Pass api keys")
+  st.stop()
+
+else:
+  st.success("API KEY LOADED")
 
 
 # ============= MODEL and AGENT CODE====================
@@ -93,6 +98,32 @@ and must show user input details
 System instructions: Only Give HTML code as output"""
 
 final_prompt = prompt + prompt_reader()
+# ====================upload image
+FILE=st.sidebar_uploader(
+  "choose an image file"
+  type["jpg","jpeg","png","webp"]
+)
+
+if FILE is not None:
+  try:
+    image=image.open(FILE)
+
+  st.sidebar.image(image,
+                  caption="uploaded Image",
+                  use_container_width=True)
+
+     if image.mode in('RGBA',"P"):
+     image=image.convert("RGB")
+
+     base_name=os.path.splitext(FILE.name)[0]
+     save_path=f"{base_name}.jpg"
+
+     image.save(save path,"jpeg")
+     st.sidebar.success(f"Image Succesfully saved as `{save_path}`
+   
+  except exception as e: 
+  st.error(f"error processing image:{e}")
+
 
 profile_url = "https://s7d1.scene7.com/is/image/wbcollab/India_PM_Narendra_Modi-2?qlt=75&resMode=sharp2"
 
