@@ -11,6 +11,8 @@ import numpy as np
 from langchain.messages import SystemMessage, HumanMessage
 from langchain.agents import create_agent
 from PIL import Image
+import base64
+
 
 
 #===================front end==============
@@ -62,13 +64,13 @@ agent = create_agent(
 # let's Generate prompt for resume using model
 
 def prompt_generator():
-  prompt = """you are a helpful AI Resume
-  maker, i want you to use chain-of-thoughts
+  prompt =  """You are a helpful AI Resume
+  maker, I want you to use chain-of-thoughts
   and give detailed prompt for model
   where user want to generate resume
   for fresher or experienced one
   in HTML format, you have to give proper
-  set of instructions, an make sure to keep
+  set of instructions, and make sure to keep
   design professional"""
 
   responce = model1.invoke(prompt)
@@ -91,10 +93,15 @@ def prompt_reader():
     prompt = f.read()
   return prompt
 
-prompt = """I want complete Professional
-resume with dynamic design using advanced CSS and JS
-and must show user input details
-System instructions: Only Give HTML code as output"""
+prompt = """you are a helpful ai assistant  with a job resume maker , 
+your task is to give html gormat resume ,with a proper designing using
+recent html js css code , with professional degsine format,
+user will upload data and return html format resume make it diffrent colour scheme and
+the resume should project m skill set  also make it look like professional ,
+create side margins table also make the text gradient for heddings like professional summary
+IMPORTANT: wherever the profile photo goes in the resume, output exactly this tag and nothing else:
+<img src="PROFILE_IMAGE_PLACEHOLDER" style="width:100px;height:100px;border-radius:50%;">
+do not draw or generate any other image tag or placeholder circle yourself"""
 
 final_prompt = prompt + prompt_reader()
 
@@ -123,8 +130,8 @@ if File is not None:
     base_name = os.path.splitext(File.name)[0]
     save_path = f"{base_name}.jpg"
       
-     image.save(save_path, "JPEG")
-     st.sidebar.success(f" IMAGE succesfully saved as  `{save_path}`!")
+    image.save(save_path, "JPEG")
+    st.sidebar.success(f" IMAGE succesfully saved as  `{save_path}`!")
 
   except Exception as e:
     st.error(f"Error processing image: {e}")
@@ -132,19 +139,56 @@ if File is not None:
 
 #change this when required new resume by user, pass details
 
-user_info = st.text_input("give your information: ")
-user_photo = st.sidebar.file_uploader("Upload pic", type = 'image/jpeg')
+user_info = st.text_area("give your information: ")
 
 
-user_query = f"""give resume for python developer.
-    User details : {user_info}
-    use user profile image from given {user_photo}"""
 
-final_query = final_prompt + user_query
+user_details = f"""user details:given below:
+resume info{user_info}
+DEFAULT IF NOT GIVEN: PYTHON DEVELOPER RESUME"""
+
+query=final_prompt+user_details
+
+OPTIONS = ["DELHI","NOIDA","GURGAON/GURUGRAM",
+          'KANPUR','LUCKNOW','BANGLORE','PUNE']
+           
+LOCATION = st.sidebar.multiselect('SELECT LOCATION: ',
+                                    options = OPTIONS )
+
+JOB_PROFILE = ["PYTHON DEVELOPER",'GEN AI',
+                'FULL-STACK DEVELOPER','DATA ANALYST']
+
+PROFILE = st.sidebar.multiselect("SELECT JOB ROLE",
+                options = JOB_PROFILE)
+
+
+job_prompt = f"""Based on {PROFILE} jobs in {LOCATION}, I 
+want latest job news in using tavily, 
+try top 10 search or whatever available
+and give result like naukri theme design with
+job name, job desc, salary,
+apply link and OUTPUT must be In HTML no markdowns"""
 
 if st.button("Generate Resume"):
   with st.spinner("Agent creating Resume..."):
-    responce = agent.invoke({'messages':[{'role':'user',"content":final_query}]})
+    response = agent.invoke({'messages':[{'role':'user',"content":final_query}]})
     code = responce['messages'][-1].content[-1]['text']
+if FILE is not None:
+  with open(save_path,"rb") as img_file:
+      b64_image= base64.b64encode(img_file.readread()).decode()
+  data_url=f"data:image/jpeg.base64,{b64_image}"
+  code=code.replace("PROFILE_IMAGE_PLACEHOLDER",data_url)
 
+    
+    
     st.html(code, width="stretch", unsafe_allow_javascript=True)
+
+st.divider()
+ response = agent.invoke({'messages':[{'role':'user',"content":job_prpmpt}]})
+ job_code = response['messages'][-1].content[-1]['text']
+ st.html(code, width="stretch", unsafe_allow_javascript=True)
+
+
+
+
+
