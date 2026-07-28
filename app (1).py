@@ -120,11 +120,11 @@ if File is not None:
         image = image.convert("RGB")
 
 
-      base_name = os.path.splitext(File.name)[0]
-      save_path = f"{base_name}.jpg"
+    base_name = os.path.splitext(File.name)[0]
+    save_path = f"{base_name}.jpg"
       
-      image.save(save_path, "JPEG")
-      st.sidebar.success(f" IMAGE succesfully saved as  `{save_path}`!")
+     image.save(save_path, "JPEG")
+     st.sidebar.success(f" IMAGE succesfully saved as  `{save_path}`!")
 
   except Exception as e:
     st.error(f"Error processing image: {e}")
